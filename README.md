@@ -22,13 +22,16 @@ go install github.com/taqnihub/gomigrate@latest
 ## 🚀 Quick Start
 
 ```bash
-# 1. Initialize gomigrate in your project
+# 1. Install
+go install github.com/taqnihub/gomigrate@latest
+
+# 2. Initialize gomigrate in your project
 gomigrate init
 
-# 2. Create your first migration
+# 3. Create your first migration
 gomigrate create add_users_table
 
-# 3. Apply it
+# 4. Apply it
 gomigrate up
 ```
 
@@ -68,13 +71,49 @@ gomigrate up
 
 ## 📥 Installation
 
-### Go Install (recommended)
+### Install the CLI
+
+With Go 1.22+ installed, one command:
 
 ```bash
 go install github.com/taqnihub/gomigrate@latest
 ```
 
-### From source
+Verify it works:
+
+```bash
+gomigrate --version
+```
+
+> **Note:** Make sure `$(go env GOPATH)/bin` is in your `$PATH`.
+> Add this to your shell config if `gomigrate` isn't found after install:
+>
+> ```bash
+> export PATH=$PATH:$(go env GOPATH)/bin
+> ```
+
+### Use as a Go library
+
+Add GoMigrate to your Go project:
+
+```bash
+go get github.com/taqnihub/gomigrate@latest
+```
+
+Then import in your code:
+
+```go
+import (
+    "github.com/taqnihub/gomigrate/config"
+    "github.com/taqnihub/gomigrate/migrate"
+)
+```
+
+See [Library Usage](#-library-usage) below for full examples.
+
+### For contributors
+
+Only needed if you want to modify the code or submit a PR:
 
 ```bash
 git clone https://github.com/taqnihub/gomigrate.git
@@ -83,15 +122,9 @@ go build -o gomigrate .
 ./gomigrate --help
 ```
 
-### Verify installation
-
-```bash
-gomigrate --version
-```
-
 ---
 
-## 📖 Usage
+## 📖 CLI Usage
 
 ### Interactive mode
 
@@ -122,7 +155,7 @@ gomigrate force 20260417042058         # Force version (fix dirty state)
 | Command | Description |
 |---------|-------------|
 | `init` | Create `.gomigrate.yml` interactively |
-| `create <name>` | Create up/down SQL files |
+| `create <n>` | Create up/down SQL files |
 | `up [n]` | Apply all pending (or next N) migrations |
 | `down [n]` | Revert last migration (or last N) |
 | `status` | Show applied vs pending migrations |
@@ -181,34 +214,34 @@ GoMigrate is also a Go library. Import it in your code:
 package main
 
 import (
-	"log"
+    "log"
 
-	"github.com/taqnihub/gomigrate/config"
-	"github.com/taqnihub/gomigrate/migrate"
+    "github.com/taqnihub/gomigrate/config"
+    "github.com/taqnihub/gomigrate/migrate"
 )
 
 func main() {
-	// Load config from .gomigrate.yml or env vars
-	cfg, err := config.Load("")
-	if err != nil {
-		log.Fatal(err)
-	}
+    // Load config from .gomigrate.yml or env vars
+    cfg, err := config.Load("")
+    if err != nil {
+        log.Fatal(err)
+    }
 
-	// Create engine
-	engine, err := migrate.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer engine.Close()
+    // Create engine
+    engine, err := migrate.New(cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer engine.Close()
 
-	// Apply all pending migrations
-	if err := engine.Up(); err != nil {
-		log.Fatal(err)
-	}
+    // Apply all pending migrations
+    if err := engine.Up(); err != nil {
+        log.Fatal(err)
+    }
 
-	// Check current version
-	version, dirty, _ := engine.Version()
-	log.Printf("at version %d (dirty: %v)", version, dirty)
+    // Check current version
+    version, dirty, _ := engine.Version()
+    log.Printf("at version %d (dirty: %v)", version, dirty)
 }
 ```
 
@@ -216,17 +249,16 @@ func main() {
 
 ```go
 func main() {
-	// ... load config ...
+    cfg, _ := config.Load("")
+    engine, _ := migrate.New(cfg)
+    defer engine.Close()
 
-	engine, _ := migrate.New(cfg)
-	defer engine.Close()
+    // Auto-apply pending migrations when the app starts
+    if err := engine.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+        log.Fatal("migration failed:", err)
+    }
 
-	// Auto-apply pending migrations when the app starts
-	if err := engine.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatal("migration failed:", err)
-	}
-
-	// ... start your web server ...
+    // ... start your web server ...
 }
 ```
 
@@ -265,7 +297,7 @@ DROP TABLE IF EXISTS users;
 | `create_<table>_table` | `create_users_table` |
 | `add_<column>_to_<table>` | `add_email_to_users` |
 | `drop_<column>_from_<table>` | `drop_legacy_id_from_orders` |
-| `add_index_<name>_to_<table>` | `add_index_email_to_users` |
+| `add_index_<n>` | `add_index_email_to_users` |
 
 ---
 
@@ -284,7 +316,7 @@ DROP TABLE IF EXISTS users;
 
 ---
 
-## 🛠️ Development
+## 🛠️ Development (for contributors)
 
 ### Prerequisites
 

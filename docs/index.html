@@ -43,7 +43,6 @@
       radial-gradient(at 80% 100%, rgba(126, 231, 255, 0.03) 0%, transparent 40%);
   }
 
-  /* Grain overlay */
   body::before {
     content: '';
     position: fixed;
@@ -55,7 +54,6 @@
     mix-blend-mode: overlay;
   }
 
-  /* ───── Layout ───── */
   .shell {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -64,7 +62,6 @@
     min-height: 100vh;
   }
 
-  /* ───── Sidebar ───── */
   aside {
     position: sticky;
     top: 0;
@@ -86,10 +83,7 @@
     gap: 8px;
   }
 
-  .brand-bolt {
-    color: var(--accent);
-    font-size: 20px;
-  }
+  .brand-bolt { color: var(--accent); font-size: 20px; }
 
   .brand-sub {
     font-family: 'JetBrains Mono', monospace;
@@ -100,9 +94,7 @@
     margin-bottom: 40px;
   }
 
-  .nav-group {
-    margin-bottom: 32px;
-  }
+  .nav-group { margin-bottom: 32px; }
 
   .nav-group-title {
     font-family: 'JetBrains Mono', monospace;
@@ -115,9 +107,7 @@
     padding-left: 2px;
   }
 
-  nav ul {
-    list-style: none;
-  }
+  nav ul { list-style: none; }
 
   nav a {
     display: block;
@@ -131,10 +121,7 @@
     position: relative;
   }
 
-  nav a:hover {
-    color: var(--text);
-    background: rgba(255,255,255,0.03);
-  }
+  nav a:hover { color: var(--text); background: rgba(255,255,255,0.03); }
 
   nav a.active {
     color: var(--accent);
@@ -153,7 +140,6 @@
     border-radius: 1px;
   }
 
-  /* ───── Main content ───── */
   main {
     padding: 80px 80px 160px;
     max-width: 960px;
@@ -236,7 +222,6 @@
     margin-left: 6px;
   }
 
-  /* ───── Section headings ───── */
   section {
     margin-bottom: 80px;
     scroll-margin-top: 24px;
@@ -299,9 +284,7 @@
     transition: border-color 0.2s;
   }
 
-  a:hover {
-    border-bottom-color: var(--cyan);
-  }
+  a:hover { border-bottom-color: var(--cyan); }
 
   ul, ol {
     padding-left: 20px;
@@ -309,11 +292,8 @@
     color: var(--text-dim);
   }
 
-  li {
-    margin-bottom: 6px;
-  }
+  li { margin-bottom: 6px; }
 
-  /* ───── Code blocks ───── */
   code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.88em;
@@ -345,7 +325,6 @@
     font-size: inherit;
   }
 
-  /* Terminal-style code block */
   pre.terminal {
     background: #060a10;
     border-color: var(--border-bright);
@@ -376,9 +355,7 @@
     line-height: 1;
   }
 
-  pre.terminal code {
-    color: #d6e3f3;
-  }
+  pre.terminal code { color: #d6e3f3; }
 
   .comment { color: var(--text-muted); font-style: italic; }
   .prompt { color: var(--accent); }
@@ -390,7 +367,6 @@
   .type { color: var(--cyan); }
   .func { color: #ffd580; }
 
-  /* ───── Callouts ───── */
   .callout {
     border-left: 3px solid var(--accent);
     background: rgba(247, 201, 72, 0.04);
@@ -398,6 +374,12 @@
     border-radius: 0 8px 8px 0;
     margin: 24px 0;
   }
+
+  .callout.cyan { border-left-color: var(--cyan); background: rgba(126, 231, 255, 0.04); }
+  .callout.cyan .callout-label { color: var(--cyan); }
+
+  .callout.pink { border-left-color: var(--pink); background: rgba(255, 126, 182, 0.04); }
+  .callout.pink .callout-label { color: var(--pink); }
 
   .callout-label {
     font-family: 'JetBrains Mono', monospace;
@@ -411,7 +393,65 @@
 
   .callout p:last-child { margin-bottom: 0; }
 
-  /* ───── Tables ───── */
+  /* Install path cards — 3 audience cards */
+  .audience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0 32px;
+  }
+
+  .audience-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .audience-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .audience-card.lib::before { background: var(--cyan); }
+  .audience-card.dev::before { background: var(--pink); }
+
+  .audience-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .audience-card.lib .audience-label { color: var(--cyan); }
+  .audience-card.dev .audience-label { color: var(--pink); }
+
+  .audience-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .audience-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 0;
+  }
+
   .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--border);
@@ -443,15 +483,9 @@
     font-weight: 700;
   }
 
-  td {
-    color: var(--text-dim);
-  }
+  td { color: var(--text-dim); }
+  td code { font-size: 12.5px; }
 
-  td code {
-    font-size: 12.5px;
-  }
-
-  /* ───── Command showcase ───── */
   .cmd-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -486,7 +520,6 @@
     line-height: 1.5;
   }
 
-  /* ───── Divider ───── */
   .divider {
     display: flex;
     align-items: center;
@@ -505,7 +538,6 @@
     background: var(--border);
   }
 
-  /* ───── Mobile ───── */
   @media (max-width: 980px) {
     .shell { grid-template-columns: 1fr; }
     aside {
@@ -518,9 +550,9 @@
     main { padding: 48px 24px 120px; }
     h1.page-title { font-size: 48px; }
     h2 { font-size: 28px; }
+    .audience-grid { grid-template-columns: 1fr; }
   }
 
-  /* ───── Scrollbar ───── */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -540,10 +572,18 @@
     <div class="brand-sub">v0.1.0 · documentation</div>
 
     <div class="nav-group">
-      <div class="nav-group-title">Part 01 · CLI</div>
+      <div class="nav-group-title">Getting Started</div>
       <nav>
         <ul>
           <li><a href="#install" class="active">Installation</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">Part 01 · CLI</div>
+      <nav>
+        <ul>
           <li><a href="#init">Initialize a project</a></li>
           <li><a href="#commands">Commands</a></li>
           <li><a href="#create">Creating migrations</a></li>
@@ -561,7 +601,6 @@
       <nav>
         <ul>
           <li><a href="#library">As a Go library</a></li>
-          <li><a href="#install-lib">Installation</a></li>
           <li><a href="#basic-usage">Basic usage</a></li>
           <li><a href="#auto-migrate">Auto-migrate on boot</a></li>
           <li><a href="#programmatic">Programmatic config</a></li>
@@ -588,30 +627,104 @@
       </div>
     </div>
 
+    <!-- ═══════════ INSTALLATION ═══════════ -->
+    <section id="install">
+      <h2><span class="num">00</span> Installation</h2>
+      <p>
+        GoMigrate has three audiences, each with a different installation path.
+        Most developers fall into one of the first two — you only need to clone
+        the repo if you want to contribute code.
+      </p>
+
+      <div class="audience-grid">
+        <div class="audience-card">
+          <div class="audience-label">Path A</div>
+          <div class="audience-title">CLI Users</div>
+          <div class="audience-desc">You want to use the <code>gomigrate</code> command in your terminal.</div>
+        </div>
+        <div class="audience-card lib">
+          <div class="audience-label">Path B</div>
+          <div class="audience-title">Library Users</div>
+          <div class="audience-desc">You want to import gomigrate into your Go app.</div>
+        </div>
+        <div class="audience-card dev">
+          <div class="audience-label">Path C</div>
+          <div class="audience-title">Contributors</div>
+          <div class="audience-desc">You want to modify the code or submit a PR.</div>
+        </div>
+      </div>
+
+      <h3>Path A — Install the CLI</h3>
+      <p>With Go 1.22+ installed, a single command:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go install</span> github.com/taqnihub/gomigrate@latest</code></pre>
+
+      <p>Verify the installation:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate</span> <span class="flag">--version</span>
+gomigrate version 0.1.0</code></pre>
+
+      <div class="callout">
+        <div class="callout-label">PATH Note</div>
+        <p>
+          Make sure <code>$(go env GOPATH)/bin</code> is in your <code>$PATH</code>.
+          If <code>gomigrate</code> isn't found after install, add this to your shell config:
+        </p>
+
+<pre class="terminal" style="margin-top: 12px;"><code><span class="prompt">$</span> <span class="cmd">export</span> PATH=<span class="string">"$PATH:$(go env GOPATH)/bin"</span></code></pre>
+      </div>
+
+      <h3>Path B — Use as a Go library</h3>
+      <p>Inside your Go project, add it as a dependency:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go get</span> github.com/taqnihub/gomigrate@latest</code></pre>
+
+      <p>Then import the packages you need:</p>
+
+<pre><code><span class="keyword">import</span> (
+    <span class="string">"github.com/taqnihub/gomigrate/config"</span>
+    <span class="string">"github.com/taqnihub/gomigrate/migrate"</span>
+)</code></pre>
+
+      <p>See <a href="#library">Part Two</a> below for usage examples.</p>
+
+      <div class="callout cyan">
+        <div class="callout-label">Two packages, one library</div>
+        <p>
+          <code>config</code> loads and validates configuration.
+          <code>migrate</code> contains the engine and operations (Up, Down, Version, etc.).
+          Import either or both.
+        </p>
+      </div>
+
+      <h3>Path C — Clone the repo (contributors only)</h3>
+      <p>
+        This path is only for developers who want to contribute code, fix bugs,
+        or modify the library itself. <strong>You don't need this to use gomigrate.</strong>
+      </p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">git clone</span> https://github.com/taqnihub/gomigrate.git
+<span class="prompt">$</span> <span class="cmd">cd</span> gomigrate
+<span class="prompt">$</span> <span class="cmd">go build</span> <span class="flag">-o</span> gomigrate <span class="literal">.</span>
+<span class="prompt">$</span> ./gomigrate <span class="flag">--help</span></code></pre>
+
+      <div class="callout pink">
+        <div class="callout-label">Contribute</div>
+        <p>
+          See <code>CONTRIBUTING.md</code> for the development workflow,
+          code style expectations, and how to run tests.
+        </p>
+      </div>
+    </section>
+
+    <div class="divider">BEGIN · PART 01</div>
+
     <!-- ═══════════ PART 1 ═══════════ -->
     <h2><span class="num">PART ONE</span> Using the CLI</h2>
     <p>
       The fastest way to use GoMigrate is as a standalone command-line tool. Install it once,
       drop a config file in your project, and run short, memorable commands instead of 200-character Docker invocations.
     </p>
-
-    <!-- Installation -->
-    <section id="install">
-      <h3>Installation</h3>
-      <p>With Go 1.22 or newer installed, grab the binary with a single command:</p>
-
-<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go install</span> github.com/taqnihub/gomigrate@latest</code></pre>
-
-      <p>Verify it's on your <code>$PATH</code>:</p>
-
-<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate</span> <span class="flag">--version</span>
-gomigrate version 0.1.0</code></pre>
-
-      <div class="callout">
-        <div class="callout-label">Note</div>
-        <p>If <code>gomigrate</code> isn't found after install, make sure <code>$(go env GOPATH)/bin</code> is in your <code>$PATH</code>.</p>
-      </div>
-    </section>
 
     <!-- Init -->
     <section id="init">
@@ -936,33 +1049,29 @@ What would you like to do?
       your own migration tooling.
     </p>
 
-    <!-- Install -->
-    <section id="install-lib">
-      <h3>Installation</h3>
-      <p>Add GoMigrate to your Go module:</p>
+    <p>
+      You already installed the library in the <a href="#install">Installation</a> section above —
+      if you skipped that, just run <code>go get github.com/taqnihub/gomigrate@latest</code> inside
+      your Go project.
+    </p>
 
-<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go get</span> github.com/taqnihub/gomigrate@latest</code></pre>
-
-      <p>Two public packages are exported:</p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Package</th><th>Purpose</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>github.com/taqnihub/gomigrate/config</code></td>
-              <td>Load and validate configuration from files, env vars, or programmatically.</td>
-            </tr>
-            <tr>
-              <td><code>github.com/taqnihub/gomigrate/migrate</code></td>
-              <td>Run migrations — Up, Down, Version, Create, Force, List.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Package</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>github.com/taqnihub/gomigrate/config</code></td>
+            <td>Load and validate configuration from files, env vars, or programmatically.</td>
+          </tr>
+          <tr>
+            <td><code>github.com/taqnihub/gomigrate/migrate</code></td>
+            <td>Run migrations — Up, Down, Version, Create, Force, List.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Basic Usage -->
     <section id="basic-usage">
@@ -1205,7 +1314,6 @@ What would you like to do?
 </div>
 
 <script>
-  // Simple scrollspy for sidebar
   const sections = document.querySelectorAll('section[id], h2[id]');
   const navLinks = document.querySelectorAll('nav a');
 
