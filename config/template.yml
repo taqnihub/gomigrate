@@ -1,0 +1,24 @@
+# GoMigrate configuration
+# Docs: https://github.com/taqnihub/gomigrate
+
+# Database driver: mysql or postgres
+driver: {{.Driver}}
+
+# Connection details
+host: {{.Host}}
+port: {{.Port}}
+database: {{.Database}}
+user: {{.User}}
+password: {{.Password}}
+
+# Where migration files are stored
+migrations_dir: {{.MigrationsDir}}
+
+# Optional: SSL mode for PostgreSQL (disable, require, verify-full)
+ssl_mode: {{.SSLMode}}
+
+# Optional: Timezone for timestamps
+timezone: {{.Timezone}}
+
+# Optional: How long to wait for migration lock
+lock_timeout: 15s
