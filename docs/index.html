@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GoMigrate — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg-2: #0f141b;
+    --bg-3: #151c25;
+    --surface: #1a222d;
+    --border: #26303e;
+    --border-bright: #3b4a5f;
+    --text: #e6edf3;
+    --text-dim: #8b96a7;
+    --text-muted: #5c6473;
+    --accent: #f7c948;
+    --accent-dim: #c69a2d;
+    --cyan: #7ee7ff;
+    --pink: #ff7eb6;
+    --green: #7ee787;
+    --red: #ff6a69;
+    --purple: #c49bff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(247, 201, 72, 0.04) 0%, transparent 40%),
+      radial-gradient(at 80% 100%, rgba(126, 231, 255, 0.03) 0%, transparent 40%);
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 100;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay;
+  }
+
+  /* ───── Layout ───── */
+  .shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* ───── Sidebar ───── */
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 40px 28px;
+    border-right: 1px solid var(--border);
+    background: var(--bg-2);
+    overflow-y: auto;
+  }
+
+  .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .brand-bolt {
+    color: var(--accent);
+    font-size: 20px;
+  }
+
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .nav-group {
+    margin-bottom: 32px;
+  }
+
+  .nav-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  nav ul {
+    list-style: none;
+  }
+
+  nav a {
+    display: block;
+    padding: 7px 12px;
+    margin-left: -12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  nav a:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  nav a.active {
+    color: var(--accent);
+    background: rgba(247, 201, 72, 0.07);
+  }
+
+  nav a.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  /* ───── Main content ───── */
+  main {
+    padding: 80px 80px 160px;
+    max-width: 960px;
+    min-width: 0;
+  }
+
+  .hero {
+    margin-bottom: 80px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .hero::after {
+    content: '01 / 02';
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1.page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    font-variation-settings: 'opsz' 144;
+  }
+
+  h1.page-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .lede {
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .meta-row span strong {
+    color: var(--text);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+
+  /* ───── Section headings ───── */
+  section {
+    margin-bottom: 80px;
+    scroll-margin-top: 24px;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    transform: translateY(-4px);
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 48px 0 16px;
+    color: var(--text);
+  }
+
+  h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin: 32px 0 12px;
+  }
+
+  p {
+    margin-bottom: 18px;
+    color: var(--text-dim);
+  }
+
+  p strong, li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--cyan);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  a:hover {
+    border-bottom-color: var(--cyan);
+  }
+
+  ul, ol {
+    padding-left: 20px;
+    margin-bottom: 18px;
+    color: var(--text-dim);
+  }
+
+  li {
+    margin-bottom: 6px;
+  }
+
+  /* ───── Code blocks ───── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 16px 0 24px;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: inherit;
+  }
+
+  /* Terminal-style code block */
+  pre.terminal {
+    background: #060a10;
+    border-color: var(--border-bright);
+    position: relative;
+    padding-top: 36px;
+  }
+
+  pre.terminal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: linear-gradient(to bottom, #0e1520, #0b111a);
+    border-bottom: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+  }
+
+  pre.terminal::after {
+    content: '● ● ●';
+    position: absolute;
+    top: 6px;
+    left: 12px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: #4b5566;
+    line-height: 1;
+  }
+
+  pre.terminal code {
+    color: #d6e3f3;
+  }
+
+  .comment { color: var(--text-muted); font-style: italic; }
+  .prompt { color: var(--accent); }
+  .cmd { color: #a9e0ff; }
+  .flag { color: var(--pink); }
+  .string { color: var(--green); }
+  .keyword { color: var(--purple); }
+  .literal { color: var(--accent); }
+  .type { color: var(--cyan); }
+  .func { color: #ffd580; }
+
+  /* ───── Callouts ───── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(247, 201, 72, 0.04);
+    padding: 20px 24px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0;
+  }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ───── Tables ───── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 20px 0 28px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-2);
+    font-weight: 700;
+  }
+
+  td {
+    color: var(--text-dim);
+  }
+
+  td code {
+    font-size: 12.5px;
+  }
+
+  /* ───── Command showcase ───── */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin: 24px 0 32px;
+  }
+
+  .cmd-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s ease;
+  }
+
+  .cmd-card:hover {
+    border-color: var(--border-bright);
+    transform: translateY(-1px);
+  }
+
+  .cmd-card-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .cmd-card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ───── Divider ───── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 72px 0;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ───── Mobile ───── */
+  @media (max-width: 980px) {
+    .shell { grid-template-columns: 1fr; }
+    aside {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+    }
+    main { padding: 48px 24px 120px; }
+    h1.page-title { font-size: 48px; }
+    h2 { font-size: 28px; }
+  }
+
+  /* ───── Scrollbar ───── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside>
+    <div class="brand">
+      <span class="brand-bolt">⚡</span>
+      <span>gomigrate</span>
+    </div>
+    <div class="brand-sub">v0.1.0 · documentation</div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">Part 01 · CLI</div>
+      <nav>
+        <ul>
+          <li><a href="#install" class="active">Installation</a></li>
+          <li><a href="#init">Initialize a project</a></li>
+          <li><a href="#commands">Commands</a></li>
+          <li><a href="#create">Creating migrations</a></li>
+          <li><a href="#up-down">Apply &amp; revert</a></li>
+          <li><a href="#status">Checking status</a></li>
+          <li><a href="#force">Fix dirty state</a></li>
+          <li><a href="#tui">Interactive mode</a></li>
+          <li><a href="#config">Configuration</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">Part 02 · Library</div>
+      <nav>
+        <ul>
+          <li><a href="#library">As a Go library</a></li>
+          <li><a href="#install-lib">Installation</a></li>
+          <li><a href="#basic-usage">Basic usage</a></li>
+          <li><a href="#auto-migrate">Auto-migrate on boot</a></li>
+          <li><a href="#programmatic">Programmatic config</a></li>
+          <li><a href="#api">API reference</a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="eyebrow">Documentation</div>
+      <h1 class="page-title">Database migrations<br /><em>without the pain.</em></h1>
+      <p class="lede">
+        GoMigrate is a friendly wrapper around <code>golang-migrate</code> with short commands, YAML config, and an interactive terminal UI. Works as a CLI and as a Go library.
+      </p>
+      <div class="meta-row">
+        <span>Drivers <strong>MySQL · PostgreSQL</strong></span>
+        <span>Go <strong>1.22+</strong></span>
+        <span>License <strong>MIT</strong></span>
+      </div>
+    </div>
+
+    <!-- ═══════════ PART 1 ═══════════ -->
+    <h2><span class="num">PART ONE</span> Using the CLI</h2>
+    <p>
+      The fastest way to use GoMigrate is as a standalone command-line tool. Install it once,
+      drop a config file in your project, and run short, memorable commands instead of 200-character Docker invocations.
+    </p>
+
+    <!-- Installation -->
+    <section id="install">
+      <h3>Installation</h3>
+      <p>With Go 1.22 or newer installed, grab the binary with a single command:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go install</span> github.com/taqnihub/gomigrate@latest</code></pre>
+
+      <p>Verify it's on your <code>$PATH</code>:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate</span> <span class="flag">--version</span>
+gomigrate version 0.1.0</code></pre>
+
+      <div class="callout">
+        <div class="callout-label">Note</div>
+        <p>If <code>gomigrate</code> isn't found after install, make sure <code>$(go env GOPATH)/bin</code> is in your <code>$PATH</code>.</p>
+      </div>
+    </section>
+
+    <!-- Init -->
+    <section id="init">
+      <h3>Initialize a project</h3>
+      <p>
+        Inside the root of your project, run <code>gomigrate init</code>. You'll be walked through an
+        interactive wizard that asks for your driver, connection details, and migrations directory.
+      </p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate init</span>
+
+🚀 Welcome to GoMigrate
+
+? Database driver:
+  <span class="literal">&gt; MySQL</span>
+    PostgreSQL
+
+? Host: <span class="string">localhost</span>
+? Port: <span class="string">3306</span>
+? Database name: <span class="string">myapp</span>
+? Username: <span class="string">root</span>
+? Password: <span class="string">********</span>
+? Migrations directory: <span class="string">./db/migrations</span>
+
+✓ GoMigrate initialized!
+  Config:      /path/to/project/.gomigrate.yml
+  Migrations:  /path/to/project/db/migrations</code></pre>
+
+      <p>This creates two things:</p>
+      <ul>
+        <li><code>.gomigrate.yml</code> — a config file with your connection details</li>
+        <li><code>./db/migrations/</code> — an empty directory where your SQL files will live</li>
+      </ul>
+    </section>
+
+    <!-- Commands -->
+    <section id="commands">
+      <h3>Commands at a glance</h3>
+
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate init</div>
+          <div class="cmd-card-desc">Interactive wizard to create <code>.gomigrate.yml</code></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate create</div>
+          <div class="cmd-card-desc">Generate a pair of up/down SQL files</div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate up</div>
+          <div class="cmd-card-desc">Apply all pending migrations</div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate down</div>
+          <div class="cmd-card-desc">Revert the last applied migration</div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate status</div>
+          <div class="cmd-card-desc">Show which migrations are applied vs pending</div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-card-name">gomigrate force</div>
+          <div class="cmd-card-desc">Reset the version (fixes dirty state)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Create -->
+    <section id="create">
+      <h3>Creating a migration</h3>
+      <p>
+        Run <code>gomigrate create</code> with a descriptive name. Two timestamped SQL files will be
+        generated — one for applying the change, one for reverting it.
+      </p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate create</span> add_users_table
+
+✨ Creating Migration
+
+  ✓ Created migration files
+
+  UP:    db/migrations/20260417103045_add_users_table.up.sql
+  DOWN:  db/migrations/20260417103045_add_users_table.down.sql
+
+  Next: edit the files with your SQL, then run  gomigrate up</code></pre>
+
+      <h4>Naming conventions</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Pattern</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>create_&lt;table&gt;_table</code></td><td><code>create_users_table</code></td></tr>
+            <tr><td><code>add_&lt;column&gt;_to_&lt;table&gt;</code></td><td><code>add_email_to_users</code></td></tr>
+            <tr><td><code>drop_&lt;column&gt;_from_&lt;table&gt;</code></td><td><code>drop_legacy_id_from_orders</code></td></tr>
+            <tr><td><code>add_index_&lt;name&gt;</code></td><td><code>add_index_email_to_users</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Now open the generated files and write your SQL. Example for <code>users</code>:</p>
+
+<pre><code><span class="comment">-- up.sql</span>
+<span class="keyword">CREATE TABLE</span> users (
+  id <span class="type">INT AUTO_INCREMENT</span> <span class="keyword">PRIMARY KEY</span>,
+  email <span class="type">VARCHAR(255)</span> <span class="keyword">NOT NULL UNIQUE</span>,
+  created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> CURRENT_TIMESTAMP
+);</code></pre>
+
+<pre><code><span class="comment">-- down.sql</span>
+<span class="keyword">DROP TABLE IF EXISTS</span> users;</code></pre>
+
+      <div class="callout">
+        <div class="callout-label">Safeguard</div>
+        <p>
+          GoMigrate refuses to create two migrations with the same name and tells you which existing
+          files conflict. This prevents silent duplicates that crash your migrations at runtime.
+        </p>
+      </div>
+    </section>
+
+    <!-- Up & Down -->
+    <section id="up-down">
+      <h3>Applying &amp; reverting</h3>
+      <p>To apply every pending migration in order, just run:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate up</span>
+
+⚡ Applying Migrations
+
+  Database:  mysql on localhost:3306/myapp
+
+  Will apply 3 migration(s):
+    →  20260417103045  add_users_table
+    →  20260417103112  add_products_table
+    →  20260417103158  add_orders_table
+
+    ✓  20260417103045  add_users_table
+    ✓  20260417103112  add_products_table
+    ✓  20260417103158  add_orders_table
+
+  ✓ Applied 3 migration(s) in 12ms
+  Version:   0 → 20260417103158</code></pre>
+
+      <p>Apply only the next N migrations by passing a number:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate up</span> <span class="literal">1</span>    <span class="comment"># apply just the next one</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate up</span> <span class="literal">3</span>    <span class="comment"># apply the next three</span></code></pre>
+
+      <h4>Reverting</h4>
+      <p>To undo the most recent migration:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate down</span>
+
+⬇  Reverting Migrations
+
+  Database:  mysql on localhost:3306/myapp
+
+  Will revert 1 migration(s):
+    ←  20260417103158  add_orders_table
+
+    ✓  20260417103158  add_orders_table
+
+  ✓ Reverted 1 migration(s) in 6ms
+  Version:   20260417103158 → 20260417103112</code></pre>
+
+      <p>Revert N migrations, or use <code>--all</code> to revert everything:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate down</span> <span class="literal">3</span>          <span class="comment"># revert the last three</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate down</span> <span class="flag">--all</span>      <span class="comment"># revert ALL (destructive)</span></code></pre>
+
+      <div class="callout">
+        <div class="callout-label">Warning</div>
+        <p>
+          <code>down --all</code> drops every table managed by GoMigrate. Always double-check the
+          connected database before running it in production.
+        </p>
+      </div>
+    </section>
+
+    <!-- Status -->
+    <section id="status">
+      <h3>Checking status</h3>
+      <p>See which migrations are applied and which are pending:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate status</span>
+
+📋 Migration Status
+
+  Database:   mysql on localhost:3306/myapp
+  Directory:  ./db/migrations
+
+   VERSION           NAME                      STATUS
+   ──────────────────────────────────────────────────────
+   20260417103045    add_users_table           ✓ applied
+   20260417103112    add_products_table        ✓ applied
+   20260417103158    add_orders_table          ○ pending
+
+  3 total · 2 applied · 1 pending</code></pre>
+    </section>
+
+    <!-- Force -->
+    <section id="force">
+      <h3>Fixing a dirty state</h3>
+      <p>
+        If a migration fails halfway through, GoMigrate marks the database as <strong>dirty</strong>
+        and refuses to run further migrations until you resolve it. First, manually fix the schema in your
+        database. Then tell GoMigrate what version the schema actually matches:
+      </p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate force</span> <span class="literal">20260417103112</span>
+
+🔧 Forcing Migration Version
+
+  ✓ Version forced to 20260417103112
+
+  ⚠ No SQL was executed.
+     Make sure your database schema matches this version!</code></pre>
+
+      <div class="callout">
+        <div class="callout-label">Important</div>
+        <p>
+          <code>force</code> doesn't run any SQL. It only updates the <code>schema_migrations</code> table.
+          You must ensure your actual schema matches the version you claim to be at.
+        </p>
+      </div>
+    </section>
+
+    <!-- TUI -->
+    <section id="tui">
+      <h3>Interactive mode</h3>
+      <p>Run <code>gomigrate</code> with no arguments to get a keyboard-navigable menu:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">gomigrate</span>
+
+⚡ GoMigrate
+mysql · localhost:3306 · myapp
+
+What would you like to do?
+
+  <span class="literal">&gt; ▶  Apply migrations</span>
+    ◀  Revert last migration
+    ✚  Create new migration
+    📋 View status
+    🔧 Force version
+    q  Quit
+
+↑/↓ navigate · enter select · q quit</code></pre>
+
+      <p>
+        Use arrow keys (or <code>j</code>/<code>k</code> for vim users) to move, <code>Enter</code>
+        to select, and <code>q</code> or <code>Esc</code> to quit.
+      </p>
+    </section>
+
+    <!-- Config -->
+    <section id="config">
+      <h3>Configuration</h3>
+      <p>
+        GoMigrate reads settings from multiple sources, applied in this order (highest priority first):
+      </p>
+
+      <ol>
+        <li>CLI flags — e.g. <code>--driver postgres</code></li>
+        <li>Environment variables with the <code>GOMIGRATE_</code> prefix</li>
+        <li><code>.gomigrate.yml</code> in the current directory</li>
+        <li><code>.gomigrate.yml</code> in your home directory</li>
+        <li>Sensible defaults</li>
+      </ol>
+
+      <h4>Config file reference</h4>
+
+<pre><code><span class="comment"># .gomigrate.yml</span>
+<span class="type">driver</span>: <span class="string">mysql</span>              <span class="comment"># mysql or postgres</span>
+<span class="type">host</span>: <span class="string">localhost</span>
+<span class="type">port</span>: <span class="literal">3306</span>
+<span class="type">database</span>: <span class="string">myapp</span>
+<span class="type">user</span>: <span class="string">root</span>
+<span class="type">password</span>: <span class="string">secret</span>
+<span class="type">migrations_dir</span>: <span class="string">./db/migrations</span>
+
+<span class="comment"># Optional</span>
+<span class="type">ssl_mode</span>: <span class="string">disable</span>            <span class="comment"># disable | require | verify-full</span>
+<span class="type">timezone</span>: <span class="string">UTC</span>
+<span class="type">lock_timeout</span>: <span class="string">15s</span></code></pre>
+
+      <h4>Using environment variables</h4>
+      <p>Any config value can be overridden with a <code>GOMIGRATE_</code>-prefixed variable. This is how you should handle secrets in CI/CD:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">export</span> GOMIGRATE_DRIVER=postgres
+<span class="prompt">$</span> <span class="cmd">export</span> GOMIGRATE_HOST=prod-db.example.com
+<span class="prompt">$</span> <span class="cmd">export</span> GOMIGRATE_PASSWORD=<span class="string">"$DB_PASSWORD"</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate</span> up</code></pre>
+
+      <h4>Global flags</h4>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Flag</th><th>Short</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--config</code></td><td><code>-c</code></td><td>Path to config file</td></tr>
+            <tr><td><code>--driver</code></td><td><code>-d</code></td><td>Database driver (mysql or postgres)</td></tr>
+            <tr><td><code>--dir</code></td><td></td><td>Migrations directory</td></tr>
+            <tr><td><code>--verbose</code></td><td><code>-v</code></td><td>Detailed output</td></tr>
+            <tr><td><code>--no-interactive</code></td><td></td><td>Disable TUI &amp; colors (CI-friendly)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="divider">END · PART 01</div>
+
+    <!-- ═══════════ PART 2 ═══════════ -->
+    <h2 id="library"><span class="num">PART TWO</span> As a Go library</h2>
+    <p>
+      Everything the CLI does is also available as a Go library. Import <code>config</code> and <code>migrate</code>
+      packages directly into your application to run migrations programmatically — perfect for
+      auto-migrating on app startup, embedding migrations in your deployment pipeline, or building
+      your own migration tooling.
+    </p>
+
+    <!-- Install -->
+    <section id="install-lib">
+      <h3>Installation</h3>
+      <p>Add GoMigrate to your Go module:</p>
+
+<pre class="terminal"><code><span class="prompt">$</span> <span class="cmd">go get</span> github.com/taqnihub/gomigrate@latest</code></pre>
+
+      <p>Two public packages are exported:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Package</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>github.com/taqnihub/gomigrate/config</code></td>
+              <td>Load and validate configuration from files, env vars, or programmatically.</td>
+            </tr>
+            <tr>
+              <td><code>github.com/taqnihub/gomigrate/migrate</code></td>
+              <td>Run migrations — Up, Down, Version, Create, Force, List.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Basic Usage -->
+    <section id="basic-usage">
+      <h3>Basic usage</h3>
+      <p>The canonical five-line example:</p>
+
+<pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+
+    <span class="string">"github.com/taqnihub/gomigrate/config"</span>
+    <span class="string">"github.com/taqnihub/gomigrate/migrate"</span>
+)
+
+<span class="keyword">func</span> <span class="func">main</span>() {
+    cfg, _ := config.<span class="func">Load</span>(<span class="string">""</span>)            <span class="comment">// reads .gomigrate.yml + env vars</span>
+    engine, _ := migrate.<span class="func">New</span>(cfg)
+    <span class="keyword">defer</span> engine.<span class="func">Close</span>()
+
+    <span class="keyword">if</span> err := engine.<span class="func">Up</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatal</span>(err)
+    }
+}</code></pre>
+
+      <p>This does exactly what <code>gomigrate up</code> does on the command line — but from inside your own Go program.</p>
+    </section>
+
+    <!-- Auto migrate -->
+    <section id="auto-migrate">
+      <h3>Auto-migrate on app startup</h3>
+      <p>
+        A common pattern: have your web server apply any pending migrations before it starts serving traffic.
+        This guarantees your schema is always in sync with your deployed code.
+      </p>
+
+<pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"errors"</span>
+    <span class="string">"log"</span>
+    <span class="string">"net/http"</span>
+
+    <span class="string">"github.com/taqnihub/gomigrate/config"</span>
+    <span class="string">"github.com/taqnihub/gomigrate/migrate"</span>
+)
+
+<span class="keyword">func</span> <span class="func">main</span>() {
+    <span class="comment">// 1. Load config</span>
+    cfg, err := config.<span class="func">Load</span>(<span class="string">""</span>)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatalf</span>(<span class="string">"config: %v"</span>, err)
+    }
+
+    <span class="comment">// 2. Create engine and apply pending migrations</span>
+    engine, err := migrate.<span class="func">New</span>(cfg)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatalf</span>(<span class="string">"migrate init: %v"</span>, err)
+    }
+    <span class="keyword">defer</span> engine.<span class="func">Close</span>()
+
+    <span class="keyword">if</span> err := engine.<span class="func">Up</span>(); err != <span class="keyword">nil</span> {
+        <span class="comment">// ErrNoChange means we're already up-to-date — that's fine</span>
+        <span class="keyword">if</span> !errors.<span class="func">Is</span>(err, migrate.ErrNoChange) {
+            log.<span class="func">Fatalf</span>(<span class="string">"migration failed: %v"</span>, err)
+        }
+    }
+
+    <span class="comment">// 3. Log current state</span>
+    version, dirty, _ := engine.<span class="func">Version</span>()
+    log.<span class="func">Printf</span>(<span class="string">"DB at version %d (dirty=%v)"</span>, version, dirty)
+
+    <span class="comment">// 4. Start your server</span>
+    log.<span class="func">Fatal</span>(http.<span class="func">ListenAndServe</span>(<span class="string">":8080"</span>, <span class="keyword">nil</span>))
+}</code></pre>
+
+      <div class="callout">
+        <div class="callout-label">Pattern</div>
+        <p>
+          Use <code>errors.Is(err, migrate.ErrNoChange)</code> to ignore the "nothing to apply" case.
+          Every other error should halt startup — you don't want to serve traffic with an outdated schema.
+        </p>
+      </div>
+    </section>
+
+    <!-- Programmatic -->
+    <section id="programmatic">
+      <h3>Programmatic configuration</h3>
+      <p>
+        You don't need a YAML file. Build a <code>config.Config</code> struct directly — useful
+        when your app composes config from multiple sources (secret managers, Consul, AWS Parameter Store, etc.):
+      </p>
+
+<pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+    <span class="string">"log"</span>
+    <span class="string">"os"</span>
+
+    <span class="string">"github.com/taqnihub/gomigrate/config"</span>
+    <span class="string">"github.com/taqnihub/gomigrate/migrate"</span>
+)
+
+<span class="keyword">func</span> <span class="func">main</span>() {
+    cfg := &config.Config{
+        Driver:        <span class="string">"postgres"</span>,
+        Host:          os.<span class="func">Getenv</span>(<span class="string">"DB_HOST"</span>),
+        Port:          <span class="literal">5432</span>,
+        Database:      os.<span class="func">Getenv</span>(<span class="string">"DB_NAME"</span>),
+        User:          os.<span class="func">Getenv</span>(<span class="string">"DB_USER"</span>),
+        Password:      os.<span class="func">Getenv</span>(<span class="string">"DB_PASSWORD"</span>),
+        MigrationsDir: <span class="string">"./db/migrations"</span>,
+        SSLMode:       <span class="string">"require"</span>,
+    }
+
+    <span class="keyword">if</span> err := cfg.<span class="func">Validate</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatalf</span>(<span class="string">"invalid config: %v"</span>, err)
+    }
+
+    engine, err := migrate.<span class="func">New</span>(cfg)
+    <span class="keyword">if</span> err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatal</span>(err)
+    }
+    <span class="keyword">defer</span> engine.<span class="func">Close</span>()
+
+    <span class="keyword">if</span> err := engine.<span class="func">Up</span>(); err != <span class="keyword">nil</span> {
+        log.<span class="func">Fatal</span>(err)
+    }
+}</code></pre>
+    </section>
+
+    <!-- API -->
+    <section id="api">
+      <h3>API reference</h3>
+
+      <h4>Package: config</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Function / Method</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>config.Load(path string) (*Config, error)</code></td>
+              <td>Loads config from the given path, env vars, and defaults. Pass <code>""</code> to use default search paths.</td>
+            </tr>
+            <tr>
+              <td><code>config.Default() *Config</code></td>
+              <td>Returns a <code>*Config</code> populated with sensible defaults.</td>
+            </tr>
+            <tr>
+              <td><code>(*Config).Validate() error</code></td>
+              <td>Returns an error if required fields are missing or invalid.</td>
+            </tr>
+            <tr>
+              <td><code>(*Config).DSN() (string, error)</code></td>
+              <td>Builds the driver-specific connection string.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Package: migrate</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Function / Method</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>migrate.New(cfg *config.Config) (*Engine, error)</code></td>
+              <td>Creates a new migration engine. The migrations directory is auto-created if missing.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Close() error</code></td>
+              <td>Releases database and source resources. Call via <code>defer</code>.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Up() error</code></td>
+              <td>Apply all pending migrations. Returns <code>ErrNoChange</code> if already up-to-date.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).UpN(n int) error</code></td>
+              <td>Apply the next <code>n</code> pending migrations.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Down(n int) error</code></td>
+              <td>Revert the last <code>n</code> applied migrations.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).DownAll() error</code></td>
+              <td>Revert every applied migration. Destructive — use with caution.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Version() (uint, bool, error)</code></td>
+              <td>Returns current version, whether dirty, and any error.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Force(version int) error</code></td>
+              <td>Force-set the version without running SQL. Use to recover from dirty state.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).Create(name string) (up, down string, err error)</code></td>
+              <td>Create a new pair of up/down SQL files. Returns the paths.</td>
+            </tr>
+            <tr>
+              <td><code>(*Engine).List() ([]MigrationFile, error)</code></td>
+              <td>List all migration files on disk, sorted ascending by version.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Sentinel errors</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Error</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>migrate.ErrNoChange</code></td>
+              <td>
+                Returned by <code>Up</code>, <code>Down</code>, etc. when there's nothing to do.
+                Check with <code>errors.Is(err, migrate.ErrNoChange)</code>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="divider">END · DOCUMENTATION</div>
+
+    <p style="color: var(--text-muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em;">
+      MIT © taqnihub · Built with ⚡ golang-migrate, cobra, viper &amp; bubbletea.
+    </p>
+
+  </main>
+</div>
+
+<script>
+  // Simple scrollspy for sidebar
+  const sections = document.querySelectorAll('section[id], h2[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach((link) => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach((s) => observer.observe(s));
+</script>
+
+</body>
+</html>
