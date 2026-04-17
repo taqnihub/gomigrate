@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/taqnihub/gomigrate/internal/tui"
 	"github.com/taqnihub/gomigrate/migrate"
 )
 
-var downAll bool // --all flag
+var downAll bool
 
 var downCmd = &cobra.Command{
 	Use:   "down [n]",
@@ -33,16 +34,26 @@ func runDown(cmd *cobra.Command, args []string) {
 	}
 	defer engine.Close()
 
-	printInfo("Connected to %s://%s:%d/%s", cfg.Driver, cfg.Host, cfg.Port, cfg.Database)
+	// Title changes based on --all
+	if downAll {
+		tui.Title("⚠️  Reverting ALL Migrations")
+		fmt.Println(tui.WarningBox(
+			"This will drop all tables managed by gomigrate.\n" +
+				"All data in those tables will be lost.",
+		))
+	} else {
+		tui.Title("⬇  Reverting Migrations")
+	}
 
+	tui.KeyValue("Database", fmt.Sprintf("%s on %s:%d/%s",
+		cfg.Driver, cfg.Host, cfg.Port, cfg.Database))
+
+	beforeVersion, _, _ := engine.Version()
 	start := time.Now()
 
-	// Handle --all flag
 	if downAll {
-		printWarn("Reverting ALL migrations — this will drop all tables!")
 		err = engine.DownAll()
 	} else {
-		// Default: revert 1, or N if specified
 		n := 1
 		if len(args) == 1 {
 			parsed, parseErr := strconv.Atoi(args[0])
@@ -54,24 +65,30 @@ func runDown(cmd *cobra.Command, args []string) {
 		err = engine.Down(n)
 	}
 
-	// Handle result
+	tui.Newline()
+
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			printInfo("No applied migrations to revert")
+			tui.Info("No applied migrations to revert")
 			return
 		}
 		exitWithError(fmt.Errorf("revert failed: %w", err))
 	}
 
-	version, dirty, _ := engine.Version()
+	afterVersion, dirty, _ := engine.Version()
 	elapsed := time.Since(start).Round(time.Millisecond)
 
 	if dirty {
-		printWarn("Revert succeeded but state is dirty at version %d", version)
-	} else if version == 0 {
-		printSuccess("All migrations reverted (%s)", elapsed)
+		tui.Warning("Reverted but state is dirty at version %d", afterVersion)
+		return
+	}
+
+	reverted := beforeVersion - afterVersion
+	if afterVersion == 0 {
+		tui.Success("Reverted %d migration(s) — database is now empty (%s)", reverted, elapsed)
 	} else {
-		printSuccess("Migrations reverted — now at version %d (%s)", version, elapsed)
+		tui.Success("Reverted %d migration(s) in %s", reverted, elapsed)
+		tui.KeyValue("Version", fmt.Sprintf("%d → %d", beforeVersion, afterVersion))
 	}
 }
 

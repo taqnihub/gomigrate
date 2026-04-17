@@ -2,8 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+	"github.com/taqnihub/gomigrate/internal/tui"
+	"github.com/taqnihub/gomigrate/migrate"
 )
 
 var statusCmd = &cobra.Command{
@@ -21,62 +25,120 @@ func runStatus(cmd *cobra.Command, args []string) {
 	}
 	defer engine.Close()
 
-	// Get current DB version
 	currentVersion, dirty, err := engine.Version()
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to get version: %w", err))
 	}
 
-	// Get all migration files from disk
 	files, err := engine.List()
 	if err != nil {
 		exitWithError(fmt.Errorf("failed to list migrations: %w", err))
 	}
 
-	// Print header
-	fmt.Printf("Migration Status — %s://%s:%d/%s\n\n", cfg.Driver, cfg.Host, cfg.Port, cfg.Database)
+	// Header
+	tui.Title("📋 Migration Status")
+	tui.KeyValue("Database", fmt.Sprintf("%s on %s:%d/%s",
+		cfg.Driver, cfg.Host, cfg.Port, cfg.Database))
+	tui.KeyValue("Directory", tui.Path(cfg.MigrationsDir))
+	tui.Newline()
 
 	if len(files) == 0 {
-		printInfo("No migration files found in %s", cfg.MigrationsDir)
-		printInfo("Run 'gomigrate create <name>' to create your first migration")
+		fmt.Println(tui.WarningBox(
+			"No migration files found.\n\n" +
+				"Run '" + tui.Code("gomigrate create <name>") + "' to create your first migration.",
+		))
 		return
 	}
 
-	// Print table header
-	fmt.Printf("%-16s  %-40s  %-10s\n", "VERSION", "NAME", "STATUS")
-	fmt.Printf("%-16s  %-40s  %-10s\n", "-------", "----", "------")
+	// Render the table
+	renderStatusTable(files, currentVersion)
 
+	// Summary
 	applied := 0
 	pending := 0
-
 	for _, f := range files {
-		status := "pending"
 		if f.Version <= currentVersion {
-			status = "applied"
 			applied++
 		} else {
 			pending++
 		}
-
-		fmt.Printf("%-16d  %-40s  %-10s\n", f.Version, truncate(f.Name, 40), status)
 	}
 
-	fmt.Println()
-
+	tui.Newline()
 	if dirty {
-		printWarn("Database is in a DIRTY state at version %d", currentVersion)
-		printWarn("This means a migration failed partway. Use 'gomigrate force <version>' to reset.")
+		fmt.Println(tui.ErrorBox(
+			fmt.Sprintf("Database is DIRTY at version %d\n", currentVersion) +
+				"A migration failed partway. Fix the database manually, then run:\n" +
+				tui.Code("gomigrate force <version>"),
+		))
 	}
 
-	printInfo("Total: %d | Applied: %d | Pending: %d", len(files), applied, pending)
+	tui.Muted("%d total · %d applied · %d pending",
+		len(files), applied, pending)
 }
 
-// truncate shortens a string to max length, adding "..." if cut.
+// renderStatusTable renders a pretty table of migrations using lipgloss.
+func renderStatusTable(files []migrate.MigrationFile, currentVersion uint) {
+	// Column widths
+	const (
+		versionW = 18
+		nameW    = 40
+		statusW  = 14
+	)
+
+	headerStyle := lipgloss.NewStyle().
+		Foreground(tui.ColorMuted).
+		Bold(true).
+		Padding(0, 1)
+
+	rowStyle := lipgloss.NewStyle().Padding(0, 1)
+
+	// Divider line
+	divider := tui.Dim(strings.Repeat("─", versionW+nameW+statusW+6))
+
+	// Header row
+	fmt.Println("  " +
+		headerStyle.Width(versionW).Render("VERSION") +
+		headerStyle.Width(nameW).Render("NAME") +
+		headerStyle.Width(statusW).Render("STATUS"))
+
+	fmt.Println("  " + divider)
+
+	// Data rows
+	for _, f := range files {
+		var statusIcon, statusText string
+		var statusColor lipgloss.AdaptiveColor
+
+		if f.Version <= currentVersion {
+			statusIcon = tui.IconSuccess
+			statusText = "applied"
+			statusColor = tui.ColorSuccess
+		} else {
+			statusIcon = "○"
+			statusText = "pending"
+			statusColor = tui.ColorWarning
+		}
+
+		status := lipgloss.NewStyle().
+			Foreground(statusColor).
+			Render(fmt.Sprintf("%s %s", statusIcon, statusText))
+
+		version := fmt.Sprintf("%d", f.Version)
+		name := truncate(f.Name, nameW-2)
+
+		fmt.Println("  " +
+			rowStyle.Width(versionW).Render(version) +
+			rowStyle.Width(nameW).Render(name) +
+			rowStyle.Width(statusW).Render(status))
+	}
+}
+
+// truncate shortens a string to max length.
 func truncate(s string, max int) string {
 	if len(s) <= max {
 		return s
 	}
-	return s[:max-3] + "..."
+	return s[:max-1] + "…"
 }
 
 func init() {

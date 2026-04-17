@@ -5,32 +5,28 @@ import (
 	"os"
 
 	"github.com/taqnihub/gomigrate/config"
+	"github.com/taqnihub/gomigrate/internal/tui"
 	"github.com/taqnihub/gomigrate/migrate"
 )
 
 // loadConfig loads the config with CLI flag overrides applied.
-// Commands call this instead of config.Load() directly.
 func loadConfig() (*config.Config, error) {
 	cfg, err := config.Load(cfgFile)
 	if err != nil {
 		return nil, err
 	}
 
-	// Apply CLI flag overrides (flags take highest priority)
 	if driver != "" {
 		cfg.Driver = driver
 	}
 	if migDir != "" {
 		cfg.MigrationsDir = migDir
 	}
-	// Note: --dsn flag handling would require restructuring DSN logic;
-	// we'll skip it for now (power users can still use env vars)
 
 	return cfg, nil
 }
 
-// newEngine is a convenience function that loads config and creates an engine.
-// Commands call this at the start to get a ready-to-use engine.
+// newEngine loads config and creates an engine.
 func newEngine() (*migrate.Engine, *config.Config, error) {
 	cfg, err := loadConfig()
 	if err != nil {
@@ -45,24 +41,22 @@ func newEngine() (*migrate.Engine, *config.Config, error) {
 	return engine, cfg, nil
 }
 
-// exitWithError prints an error to stderr and exits with status 1.
-// Use this for fatal errors in commands.
+// exitWithError prints an error using lipgloss styling and exits.
 func exitWithError(err error) {
-	fmt.Fprintf(os.Stderr, "✗ %v\n", err)
+	tui.Error("%v", err)
 	os.Exit(1)
 }
 
-// printSuccess prints a success message with a green checkmark.
+// These are now just aliases to the tui package for backward compatibility.
+// Commands can use either these or tui.X directly.
 func printSuccess(format string, args ...interface{}) {
-	fmt.Printf("✓ "+format+"\n", args...)
+	tui.Success(format, args...)
 }
 
-// printInfo prints an info message.
 func printInfo(format string, args ...interface{}) {
-	fmt.Printf("ℹ "+format+"\n", args...)
+	tui.Info(format, args...)
 }
 
-// printWarn prints a warning.
 func printWarn(format string, args ...interface{}) {
-	fmt.Printf("⚠ "+format+"\n", args...)
+	tui.Warning(format, args...)
 }

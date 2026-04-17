@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/taqnihub/gomigrate/internal/tui"
 	"github.com/taqnihub/gomigrate/migrate"
 )
 
@@ -20,7 +21,7 @@ Examples:
   gomigrate up 1        # Apply only the next pending migration
   gomigrate up 3        # Apply the next 3 pending migrations`,
 
-	Args: cobra.MaximumNArgs(1), // accept 0 or 1 argument
+	Args: cobra.MaximumNArgs(1),
 	Run:  runUp,
 }
 
@@ -31,16 +32,20 @@ func runUp(cmd *cobra.Command, args []string) {
 	}
 	defer engine.Close()
 
-	printInfo("Connected to %s://%s:%d/%s", cfg.Driver, cfg.Host, cfg.Port, cfg.Database)
+	// Header
+	tui.Title("⚡ Applying Migrations")
+	tui.KeyValue("Database", fmt.Sprintf("%s on %s:%d/%s",
+		cfg.Driver, cfg.Host, cfg.Port, cfg.Database))
+
+	// Get initial version for reporting
+	beforeVersion, _, _ := engine.Version()
 
 	start := time.Now()
 
-	// Determine how many migrations to apply
+	// Determine how many to apply
 	if len(args) == 0 {
-		// No argument: apply ALL pending
 		err = engine.Up()
 	} else {
-		// Argument given: apply N
 		n, parseErr := strconv.Atoi(args[0])
 		if parseErr != nil || n <= 0 {
 			exitWithError(fmt.Errorf("invalid number %q: must be a positive integer", args[0]))
@@ -48,24 +53,29 @@ func runUp(cmd *cobra.Command, args []string) {
 		err = engine.UpN(n)
 	}
 
-	// Handle the result
+	// Handle result
+	tui.Newline()
+
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			printInfo("No pending migrations — database is up to date")
+			tui.Info("Database is up to date — no pending migrations")
 			return
 		}
 		exitWithError(fmt.Errorf("migration failed: %w", err))
 	}
 
-	// Show new version
-	version, dirty, _ := engine.Version()
+	afterVersion, dirty, _ := engine.Version()
 	elapsed := time.Since(start).Round(time.Millisecond)
 
 	if dirty {
-		printWarn("Migration succeeded but state is dirty at version %d", version)
-	} else {
-		printSuccess("Migrations applied — now at version %d (%s)", version, elapsed)
+		tui.Warning("Applied but state is dirty at version %d", afterVersion)
+		tui.Muted("Run '%s' to clean up", tui.Code("gomigrate force <version>"))
+		return
 	}
+
+	applied := afterVersion - beforeVersion
+	tui.Success("Applied %d migration(s) in %s", applied, elapsed)
+	tui.KeyValue("Version", fmt.Sprintf("%d → %d", beforeVersion, afterVersion))
 }
 
 func init() {

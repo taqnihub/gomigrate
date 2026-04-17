@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -160,8 +161,8 @@ func (e *Engine) List() ([]MigrationFile, error) {
 }
 
 // Create creates a new migration file pair (up and down) with the given name.
+// Returns an error if a migration with the same name already exists.
 // Returns the paths of the created files.
-// The version is a timestamp (YYYYMMDDHHMMSS) for chronological ordering.
 func (e *Engine) Create(name string) (upPath, downPath string, err error) {
 	if name == "" {
 		return "", "", fmt.Errorf("migration name is required")
@@ -172,11 +173,29 @@ func (e *Engine) Create(name string) (upPath, downPath string, err error) {
 		return "", "", fmt.Errorf("failed to create migrations dir: %w", err)
 	}
 
-	// Generate timestamp-based version (human-readable, chronological)
-	version := time.Now().UTC().Format("20060102150405")
-
-	// Sanitize name: lowercase, replace spaces with underscores
+	// Sanitize name
 	sanitized := sanitizeName(name)
+	if sanitized == "" {
+		return "", "", fmt.Errorf("migration name %q produced empty result after sanitization", name)
+	}
+
+	// Check for duplicate names
+	existing, err := e.findMigrationsByName(sanitized)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to check existing migrations: %w", err)
+	}
+	if len(existing) > 0 {
+		return "", "", fmt.Errorf(
+			"a migration named %q already exists (version %d)\n\nChoose a different name or delete the existing files:\n  - %s\n  - %s",
+			sanitized,
+			existing[0].Version,
+			existing[0].UpPath,
+			existing[0].DownPath,
+		)
+	}
+
+	// Generate timestamp-based version
+	version := time.Now().UTC().Format("20060102150405")
 
 	upName := fmt.Sprintf("%s_%s.up.sql", version, sanitized)
 	downName := fmt.Sprintf("%s_%s.down.sql", version, sanitized)
@@ -184,18 +203,36 @@ func (e *Engine) Create(name string) (upPath, downPath string, err error) {
 	upPath = filepath.Join(e.config.MigrationsDir, upName)
 	downPath = filepath.Join(e.config.MigrationsDir, downName)
 
-	// Create empty files with helpful comments
-	upContent := fmt.Sprintf("-- Migration: %s\n-- Created: %s\n\n-- Write your UP migration SQL here\n\n", sanitized, time.Now().Format(time.RFC3339))
-	downContent := fmt.Sprintf("-- Migration: %s (rollback)\n-- Created: %s\n\n-- Write your DOWN migration SQL here\n\n", sanitized, time.Now().Format(time.RFC3339))
+	// Create files with helpful header comments
+	upContent := fmt.Sprintf("-- Migration: %s\n-- Created: %s\n\n-- Write your UP migration SQL here\n\n",
+		sanitized, time.Now().Format(time.RFC3339))
+	downContent := fmt.Sprintf("-- Migration: %s (rollback)\n-- Created: %s\n\n-- Write your DOWN migration SQL here\n\n",
+		sanitized, time.Now().Format(time.RFC3339))
 
 	if err := os.WriteFile(upPath, []byte(upContent), 0644); err != nil {
 		return "", "", fmt.Errorf("failed to write up migration: %w", err)
 	}
 	if err := os.WriteFile(downPath, []byte(downContent), 0644); err != nil {
-		// Cleanup: remove up file if down failed
-		os.Remove(upPath)
+		os.Remove(upPath) // cleanup
 		return "", "", fmt.Errorf("failed to write down migration: %w", err)
 	}
 
 	return upPath, downPath, nil
+}
+
+// findMigrationsByName returns existing migrations that match the given name.
+// This is case-insensitive matching against the sanitized name.
+func (e *Engine) findMigrationsByName(name string) ([]MigrationFile, error) {
+	files, err := e.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var matches []MigrationFile
+	for _, f := range files {
+		if strings.EqualFold(f.Name, name) {
+			matches = append(matches, f)
+		}
+	}
+	return matches, nil
 }

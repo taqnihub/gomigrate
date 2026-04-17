@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/taqnihub/gomigrate/internal/tui"
 )
 
 var forceCmd = &cobra.Command{
@@ -14,11 +15,7 @@ var forceCmd = &cobra.Command{
 
 Use this when a migration failed partway and left the database in a
 "dirty" state. You'll need to manually fix the database first, then
-use 'force' to tell gomigrate what version it's at.
-
-Examples:
-  gomigrate force 3        # Set version to 3 (no SQL executed)
-  gomigrate force 0        # Reset version to none`,
+use 'force' to tell gomigrate what version it's at.`,
 
 	Args: cobra.ExactArgs(1),
 	Run:  runForce,
@@ -36,12 +33,18 @@ func runForce(cmd *cobra.Command, args []string) {
 	}
 	defer engine.Close()
 
+	tui.Title("🔧 Forcing Migration Version")
+
 	if err := engine.Force(version); err != nil {
 		exitWithError(fmt.Errorf("force failed: %w", err))
 	}
 
-	printSuccess("Migration version forced to %d", version)
-	printWarn("No SQL was executed — make sure your database schema matches!")
+	tui.Success("Version forced to %d", version)
+	tui.Newline()
+	fmt.Println(tui.WarningBox(
+		"No SQL was executed.\n" +
+			"Make sure your database schema matches this version!",
+	))
 }
 
 func init() {
