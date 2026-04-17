@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 	"github.com/taqnihub/gomigrate/internal/tui"
 	"github.com/taqnihub/gomigrate/migrate"
@@ -37,44 +38,86 @@ func runUp(cmd *cobra.Command, args []string) {
 	tui.KeyValue("Database", fmt.Sprintf("%s on %s:%d/%s",
 		cfg.Driver, cfg.Host, cfg.Port, cfg.Database))
 
-	// Get initial version for reporting
+	// Find pending migrations BEFORE running
 	beforeVersion, _, _ := engine.Version()
+	pending, err := pendingMigrations(engine, beforeVersion)
+	if err != nil {
+		exitWithError(fmt.Errorf("failed to list pending: %w", err))
+	}
 
-	start := time.Now()
+	if len(pending) == 0 {
+		tui.Newline()
+		tui.Info("Database is up to date — no pending migrations")
+		return
+	}
 
-	// Determine how many to apply
-	if len(args) == 0 {
-		err = engine.Up()
-	} else {
+	// Determine how many to apply (affects what we display)
+	toApply := len(pending)
+	if len(args) > 0 {
 		n, parseErr := strconv.Atoi(args[0])
 		if parseErr != nil || n <= 0 {
 			exitWithError(fmt.Errorf("invalid number %q: must be a positive integer", args[0]))
 		}
-		err = engine.UpN(n)
+		if n < toApply {
+			toApply = n
+		}
 	}
 
-	// Handle result
+	// Show what will be applied
 	tui.Newline()
+	tui.Muted("Will apply %d migration(s):", toApply)
+	for i := 0; i < toApply; i++ {
+		fmt.Printf("    %s  %d  %s\n",
+			tui.Dim("→"),
+			pending[i].Version,
+			pending[i].Name,
+		)
+	}
+	tui.Newline()
+
+	// Run it
+	start := time.Now()
+	if len(args) == 0 {
+		err = engine.Up()
+	} else {
+		err = engine.UpN(toApply)
+	}
 
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			tui.Info("Database is up to date — no pending migrations")
+			tui.Info("Database is up to date")
 			return
 		}
 		exitWithError(fmt.Errorf("migration failed: %w", err))
 	}
 
+	// Show what actually got applied
 	afterVersion, dirty, _ := engine.Version()
 	elapsed := time.Since(start).Round(time.Millisecond)
 
+	// Figure out which migrations were applied (between before and after)
+	var applied []migrate.MigrationFile
+	for _, m := range pending {
+		if m.Version > beforeVersion && m.Version <= afterVersion {
+			applied = append(applied, m)
+		}
+	}
+
+	// Print each applied migration with a checkmark
+	for _, m := range applied {
+		icon := lipgloss.NewStyle().Foreground(tui.ColorSuccess).Bold(true).Render(tui.IconSuccess)
+		fmt.Printf("    %s  %d  %s\n", icon, m.Version, m.Name)
+	}
+
+	tui.Newline()
+
 	if dirty {
 		tui.Warning("Applied but state is dirty at version %d", afterVersion)
-		tui.Muted("Run '%s' to clean up", tui.Code("gomigrate force <version>"))
+		tui.Muted("Run %s to clean up", tui.Code("gomigrate force <version>"))
 		return
 	}
 
-	applied := afterVersion - beforeVersion
-	tui.Success("Applied %d migration(s) in %s", applied, elapsed)
+	tui.Success("Applied %d migration(s) in %s", len(applied), elapsed)
 	tui.KeyValue("Version", fmt.Sprintf("%d → %d", beforeVersion, afterVersion))
 }
 

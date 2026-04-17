@@ -47,6 +47,40 @@ func exitWithError(err error) {
 	os.Exit(1)
 }
 
+// pendingMigrations returns migrations that haven't been applied yet.
+// Takes the current DB version and returns files with Version > current.
+func pendingMigrations(engine *migrate.Engine, currentVersion uint) ([]migrate.MigrationFile, error) {
+	files, err := engine.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var pending []migrate.MigrationFile
+	for _, f := range files {
+		if f.Version > currentVersion {
+			pending = append(pending, f)
+		}
+	}
+	return pending, nil
+}
+
+// appliedMigrations returns migrations that have been applied to the DB.
+// Takes the current DB version and returns files with Version <= current.
+func appliedMigrations(engine *migrate.Engine, currentVersion uint) ([]migrate.MigrationFile, error) {
+	files, err := engine.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var applied []migrate.MigrationFile
+	for _, f := range files {
+		if f.Version <= currentVersion && f.Version > 0 {
+			applied = append(applied, f)
+		}
+	}
+	return applied, nil
+}
+
 // These are now just aliases to the tui package for backward compatibility.
 // Commands can use either these or tui.X directly.
 func printSuccess(format string, args ...interface{}) {
