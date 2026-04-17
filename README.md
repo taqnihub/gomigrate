@@ -22,17 +22,35 @@ go install github.com/taqnihub/gomigrate@latest
 ## 🚀 Quick Start
 
 ```bash
-# 1. Install
+# 1. Install the CLI
 go install github.com/taqnihub/gomigrate@latest
 
-# 2. Initialize gomigrate in your project
+# 2. Verify it's installed
+gomigrate --version
+
+# 3. Initialize gomigrate in your project (interactive wizard)
 gomigrate init
 
-# 3. Create your first migration
+# 4. Create your first migration (generates .up.sql and .down.sql files)
 gomigrate create add_users_table
 
-# 4. Apply it
+# 5. Edit the generated SQL files in ./db/migrations/
+#    (add your CREATE TABLE, ALTER TABLE, etc.)
+
+# 6. Check what's pending
+gomigrate status
+
+# 7. Apply all pending migrations
 gomigrate up
+
+# 8. Verify everything was applied
+gomigrate status
+
+# 9. If you need to undo the last migration
+gomigrate down
+
+# 10. Or launch the interactive TUI menu
+gomigrate
 ```
 
 That's it. No Docker commands. No 200-character invocations. Just works.
@@ -136,30 +154,34 @@ gomigrate
 
 You'll get a menu to navigate with arrow keys.
 
-### Direct commands
+### All commands at a glance
 
-```bash
-gomigrate init                         # Set up .gomigrate.yml
-gomigrate create add_users_table       # Create new migration files
-gomigrate up                           # Apply all pending migrations
-gomigrate up 1                         # Apply only next 1 migration
-gomigrate down                         # Revert last migration
-gomigrate down 3                       # Revert last 3 migrations
-gomigrate down --all                   # Revert all migrations
-gomigrate status                       # Show migration status
-gomigrate force 20260417042058         # Force version (fix dirty state)
-```
+| Command | Description | Example |
+|---------|-------------|---------|
+| `gomigrate` | Launch interactive TUI menu | `gomigrate` |
+| `gomigrate init` | Interactive wizard to create `.gomigrate.yml` | `gomigrate init` |
+| `gomigrate init --force` | Overwrite existing config | `gomigrate init --force` |
+| `gomigrate create <name>` | Generate up/down SQL files | `gomigrate create add_users_table` |
+| `gomigrate up` | Apply all pending migrations | `gomigrate up` |
+| `gomigrate up [n]` | Apply the next N migrations | `gomigrate up 3` |
+| `gomigrate down` | Revert the last migration | `gomigrate down` |
+| `gomigrate down [n]` | Revert the last N migrations | `gomigrate down 2` |
+| `gomigrate down --all` | Revert ALL applied migrations (destructive) | `gomigrate down --all` |
+| `gomigrate status` | Show applied vs pending migrations | `gomigrate status` |
+| `gomigrate force <version>` | Reset migration version (fix dirty state) | `gomigrate force 20260417103045` |
+| `gomigrate --version` | Show gomigrate version | `gomigrate --version` |
+| `gomigrate --help` | Show help for all commands | `gomigrate --help` |
+| `gomigrate <cmd> --help` | Show help for a specific command | `gomigrate up --help` |
 
-### Command reference
+### Global flags (work with any command)
 
-| Command | Description |
-|---------|-------------|
-| `init` | Create `.gomigrate.yml` interactively |
-| `create <n>` | Create up/down SQL files |
-| `up [n]` | Apply all pending (or next N) migrations |
-| `down [n]` | Revert last migration (or last N) |
-| `status` | Show applied vs pending migrations |
-| `force <version>` | Reset version (for dirty states) |
+| Flag | Short | Description | Example |
+|------|:-----:|-------------|---------|
+| `--config <path>` | `-c` | Path to config file | `gomigrate -c ./prod.yml up` |
+| `--driver <name>` | `-d` | Override database driver | `gomigrate -d postgres status` |
+| `--dir <path>` | | Override migrations directory | `gomigrate --dir ./db/migs up` |
+| `--verbose` | `-v` | Show detailed output | `gomigrate -v up` |
+| `--no-interactive` | | Disable TUI & colors (CI-friendly) | `gomigrate --no-interactive up` |
 
 ---
 

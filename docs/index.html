@@ -393,7 +393,6 @@
 
   .callout p:last-child { margin-bottom: 0; }
 
-  /* Install path cards — 3 audience cards */
   .audience-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -486,38 +485,100 @@
   td { color: var(--text-dim); }
   td code { font-size: 12.5px; }
 
-  .cmd-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    margin: 24px 0 32px;
-  }
-
-  .cmd-card {
-    background: var(--bg-2);
+  /* ─── Commands reference table (more structured) ─── */
+  .cmd-table {
+    overflow-x: auto;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    transition: all 0.2s ease;
+    border-radius: 10px;
+    margin: 28px 0 36px;
+    background: var(--bg-2);
   }
 
-  .cmd-card:hover {
-    border-color: var(--border-bright);
-    transform: translateY(-1px);
-  }
+  .cmd-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
-  .cmd-card-name {
+  .cmd-table th {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: rgba(15, 20, 27, 0.6);
     font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 6px;
+    padding: 16px 22px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-bright);
   }
 
-  .cmd-card-desc {
+  .cmd-table td {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .cmd-table tr:last-child td { border-bottom: none; }
+
+  .cmd-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
+
+  /* Category rows — subtle divider */
+  .cmd-table tr.cat td {
+    padding: 22px 22px 10px;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  .cmd-table .cat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cmd-table .cat-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border-bright), transparent);
+  }
+
+  .cmd-cell {
+    font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .cmd-cell .cmd-flag {
+    color: var(--pink);
+    font-weight: 400;
+  }
+
+  .cmd-cell .cmd-arg {
+    color: var(--cyan);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .cmd-desc {
     color: var(--text-dim);
     line-height: 1.5;
+  }
+
+  .cmd-example {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    background: var(--bg-3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: inline-block;
+    white-space: nowrap;
   }
 
   .divider {
@@ -551,6 +612,8 @@
     h1.page-title { font-size: 48px; }
     h2 { font-size: 28px; }
     .audience-grid { grid-template-columns: 1fr; }
+    .cmd-table th, .cmd-table td { padding: 12px 14px; }
+    .cmd-table { font-size: 12.5px; }
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -576,6 +639,7 @@
       <nav>
         <ul>
           <li><a href="#install" class="active">Installation</a></li>
+          <li><a href="#quickstart">Quick start</a></li>
         </ul>
       </nav>
     </div>
@@ -584,8 +648,8 @@
       <div class="nav-group-title">Part 01 · CLI</div>
       <nav>
         <ul>
+          <li><a href="#all-commands">All commands</a></li>
           <li><a href="#init">Initialize a project</a></li>
-          <li><a href="#commands">Commands</a></li>
           <li><a href="#create">Creating migrations</a></li>
           <li><a href="#up-down">Apply &amp; revert</a></li>
           <li><a href="#status">Checking status</a></li>
@@ -717,6 +781,53 @@ gomigrate version 0.1.0</code></pre>
       </div>
     </section>
 
+    <!-- ═══════════ QUICK START ═══════════ -->
+    <section id="quickstart">
+      <h2><span class="num">01</span> Quick Start</h2>
+      <p>
+        Copy-paste this into your terminal and you'll be running migrations in under a minute.
+        Every step is intentional — skip none.
+      </p>
+
+<pre class="terminal"><code><span class="comment"># 1. Install the CLI</span>
+<span class="prompt">$</span> <span class="cmd">go install</span> github.com/taqnihub/gomigrate@latest
+
+<span class="comment"># 2. Verify it's installed</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate</span> <span class="flag">--version</span>
+
+<span class="comment"># 3. Initialize gomigrate in your project (interactive wizard)</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate init</span>
+
+<span class="comment"># 4. Create your first migration (generates .up.sql and .down.sql)</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate create</span> add_users_table
+
+<span class="comment"># 5. Edit the generated SQL files in ./db/migrations/</span>
+<span class="comment">#    (add your CREATE TABLE, ALTER TABLE, etc.)</span>
+
+<span class="comment"># 6. Check what's pending</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate status</span>
+
+<span class="comment"># 7. Apply all pending migrations</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate up</span>
+
+<span class="comment"># 8. Verify everything was applied</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate status</span>
+
+<span class="comment"># 9. If you need to undo the last migration</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate down</span>
+
+<span class="comment"># 10. Or launch the interactive TUI menu</span>
+<span class="prompt">$</span> <span class="cmd">gomigrate</span></code></pre>
+
+      <div class="callout">
+        <div class="callout-label">That's it</div>
+        <p>
+          No Docker commands. No 200-character invocations. You're already more productive
+          than someone using raw <code>golang-migrate</code>.
+        </p>
+      </div>
+    </section>
+
     <div class="divider">BEGIN · PART 01</div>
 
     <!-- ═══════════ PART 1 ═══════════ -->
@@ -725,6 +836,162 @@ gomigrate version 0.1.0</code></pre>
       The fastest way to use GoMigrate is as a standalone command-line tool. Install it once,
       drop a config file in your project, and run short, memorable commands instead of 200-character Docker invocations.
     </p>
+
+    <!-- ═══════════ ALL COMMANDS TABLE ═══════════ -->
+    <section id="all-commands">
+      <h3>Complete command reference</h3>
+      <p>
+        Every command gomigrate understands, grouped by purpose. Each row shows the command
+        syntax, a description, and a concrete example you can run.
+      </p>
+
+      <div class="cmd-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 32%;">Command</th>
+              <th style="width: 40%;">Description</th>
+              <th style="width: 28%;">Example</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Setup -->
+            <tr class="cat"><td colspan="3"><span class="cat-label">Setup</span></td></tr>
+            <tr>
+              <td class="cmd-cell">gomigrate <span class="cmd-flag">--version</span></td>
+              <td class="cmd-desc">Show gomigrate version and build info</td>
+              <td><span class="cmd-example">gomigrate --version</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate <span class="cmd-flag">--help</span></td>
+              <td class="cmd-desc">Show help for all commands</td>
+              <td><span class="cmd-example">gomigrate --help</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate <span class="cmd-arg">&lt;cmd&gt;</span> <span class="cmd-flag">--help</span></td>
+              <td class="cmd-desc">Show help for a specific subcommand</td>
+              <td><span class="cmd-example">gomigrate up --help</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate init</td>
+              <td class="cmd-desc">Interactive wizard to create <code>.gomigrate.yml</code> in the current directory</td>
+              <td><span class="cmd-example">gomigrate init</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate init <span class="cmd-flag">--force</span></td>
+              <td class="cmd-desc">Overwrite existing config without prompting</td>
+              <td><span class="cmd-example">gomigrate init --force</span></td>
+            </tr>
+
+            <!-- Migrations -->
+            <tr class="cat"><td colspan="3"><span class="cat-label">Migrations</span></td></tr>
+            <tr>
+              <td class="cmd-cell">gomigrate create <span class="cmd-arg">&lt;name&gt;</span></td>
+              <td class="cmd-desc">Generate a pair of timestamped up/down SQL files. Refuses duplicate names.</td>
+              <td><span class="cmd-example">gomigrate create add_users_table</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate up</td>
+              <td class="cmd-desc">Apply <strong>all</strong> pending migrations in order</td>
+              <td><span class="cmd-example">gomigrate up</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate up <span class="cmd-arg">[n]</span></td>
+              <td class="cmd-desc">Apply only the next N pending migrations</td>
+              <td><span class="cmd-example">gomigrate up 3</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate down</td>
+              <td class="cmd-desc">Revert the most recently applied migration (safe default)</td>
+              <td><span class="cmd-example">gomigrate down</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate down <span class="cmd-arg">[n]</span></td>
+              <td class="cmd-desc">Revert the last N applied migrations</td>
+              <td><span class="cmd-example">gomigrate down 2</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell">gomigrate down <span class="cmd-flag">--all</span></td>
+              <td class="cmd-desc"><strong>Revert ALL applied migrations</strong> — destructive, use with care</td>
+              <td><span class="cmd-example">gomigrate down --all</span></td>
+            </tr>
+
+            <!-- Inspection -->
+            <tr class="cat"><td colspan="3"><span class="cat-label">Inspection</span></td></tr>
+            <tr>
+              <td class="cmd-cell">gomigrate status</td>
+              <td class="cmd-desc">Show all migrations with applied vs pending status</td>
+              <td><span class="cmd-example">gomigrate status</span></td>
+            </tr>
+
+            <!-- Recovery -->
+            <tr class="cat"><td colspan="3"><span class="cat-label">Recovery</span></td></tr>
+            <tr>
+              <td class="cmd-cell">gomigrate force <span class="cmd-arg">&lt;version&gt;</span></td>
+              <td class="cmd-desc">Force-set version without running SQL. Fixes dirty state after a failed migration.</td>
+              <td><span class="cmd-example">gomigrate force 20260417103045</span></td>
+            </tr>
+
+            <!-- Interactive -->
+            <tr class="cat"><td colspan="3"><span class="cat-label">Interactive Mode</span></td></tr>
+            <tr>
+              <td class="cmd-cell">gomigrate</td>
+              <td class="cmd-desc">Launch the TUI menu when called with no arguments. Navigate with arrow keys.</td>
+              <td><span class="cmd-example">gomigrate</span></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Global flags (work with any command)</h4>
+
+      <div class="cmd-table">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Flag</th>
+              <th style="width: 8%;">Short</th>
+              <th style="width: 42%;">Description</th>
+              <th style="width: 28%;">Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cmd-cell"><span class="cmd-flag">--config</span> <span class="cmd-arg">&lt;path&gt;</span></td>
+              <td class="cmd-cell"><span class="cmd-flag">-c</span></td>
+              <td class="cmd-desc">Use a specific config file instead of searching</td>
+              <td><span class="cmd-example">gomigrate -c prod.yml up</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell"><span class="cmd-flag">--driver</span> <span class="cmd-arg">&lt;name&gt;</span></td>
+              <td class="cmd-cell"><span class="cmd-flag">-d</span></td>
+              <td class="cmd-desc">Override database driver (<code>mysql</code> or <code>postgres</code>)</td>
+              <td><span class="cmd-example">gomigrate -d postgres status</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell"><span class="cmd-flag">--dir</span> <span class="cmd-arg">&lt;path&gt;</span></td>
+              <td class="cmd-cell"></td>
+              <td class="cmd-desc">Override migrations directory</td>
+              <td><span class="cmd-example">gomigrate --dir ./db/migs up</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell"><span class="cmd-flag">--verbose</span></td>
+              <td class="cmd-cell"><span class="cmd-flag">-v</span></td>
+              <td class="cmd-desc">Show detailed output for debugging</td>
+              <td><span class="cmd-example">gomigrate -v up</span></td>
+            </tr>
+            <tr>
+              <td class="cmd-cell"><span class="cmd-flag">--no-interactive</span></td>
+              <td class="cmd-cell"></td>
+              <td class="cmd-desc">Disable TUI and colors — ideal for CI/CD pipelines</td>
+              <td><span class="cmd-example">gomigrate --no-interactive up</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- Init -->
     <section id="init">
@@ -758,38 +1025,6 @@ gomigrate version 0.1.0</code></pre>
         <li><code>.gomigrate.yml</code> — a config file with your connection details</li>
         <li><code>./db/migrations/</code> — an empty directory where your SQL files will live</li>
       </ul>
-    </section>
-
-    <!-- Commands -->
-    <section id="commands">
-      <h3>Commands at a glance</h3>
-
-      <div class="cmd-grid">
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate init</div>
-          <div class="cmd-card-desc">Interactive wizard to create <code>.gomigrate.yml</code></div>
-        </div>
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate create</div>
-          <div class="cmd-card-desc">Generate a pair of up/down SQL files</div>
-        </div>
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate up</div>
-          <div class="cmd-card-desc">Apply all pending migrations</div>
-        </div>
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate down</div>
-          <div class="cmd-card-desc">Revert the last applied migration</div>
-        </div>
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate status</div>
-          <div class="cmd-card-desc">Show which migrations are applied vs pending</div>
-        </div>
-        <div class="cmd-card">
-          <div class="cmd-card-name">gomigrate force</div>
-          <div class="cmd-card-desc">Reset the version (fixes dirty state)</div>
-        </div>
-      </div>
     </section>
 
     <!-- Create -->
@@ -1019,23 +1254,6 @@ What would you like to do?
 <span class="prompt">$</span> <span class="cmd">export</span> GOMIGRATE_HOST=prod-db.example.com
 <span class="prompt">$</span> <span class="cmd">export</span> GOMIGRATE_PASSWORD=<span class="string">"$DB_PASSWORD"</span>
 <span class="prompt">$</span> <span class="cmd">gomigrate</span> up</code></pre>
-
-      <h4>Global flags</h4>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Flag</th><th>Short</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>--config</code></td><td><code>-c</code></td><td>Path to config file</td></tr>
-            <tr><td><code>--driver</code></td><td><code>-d</code></td><td>Database driver (mysql or postgres)</td></tr>
-            <tr><td><code>--dir</code></td><td></td><td>Migrations directory</td></tr>
-            <tr><td><code>--verbose</code></td><td><code>-v</code></td><td>Detailed output</td></tr>
-            <tr><td><code>--no-interactive</code></td><td></td><td>Disable TUI &amp; colors (CI-friendly)</td></tr>
-          </tbody>
-        </table>
-      </div>
     </section>
 
     <div class="divider">END · PART 01</div>
