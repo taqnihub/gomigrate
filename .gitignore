@@ -1,3 +1,24 @@
-.gomigrate.yml
-.env
+# Binaries
 gomigrate
+*.exe
+*.dll
+
+# Test artifacts
+coverage.out
+*.test
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local config (users' config should not be committed)
+.gomigrate.yml
+!/.gomigrate.example.yml
+
+# Migrations generated during testing
+/db/
